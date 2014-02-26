@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6DD29C7C-97B8-4C39-BF16-1DD14494A2E5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TheFactory.Snappy.Tests</RootNamespace>
+    <AssemblyName>TheFactory.Snappy.Tests</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="nunit.framework" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TestSnappy.cs" />
+    <Compile Include="TestVarInt.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="test-data\" />
+    <Folder Include="test-data\upstream\" />
+    <Folder Include="test-data\gold\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test-data\upstream\alice29.txt" />
+    <None Include="test-data\upstream\asyoulik.txt" />
+    <None Include="test-data\upstream\baddata1.snappy" />
+    <None Include="test-data\upstream\baddata2.snappy" />
+    <None Include="test-data\upstream\baddata3.snappy" />
+    <None Include="test-data\upstream\fireworks.jpeg" />
+    <None Include="test-data\upstream\geo.protodata" />
+    <None Include="test-data\upstream\html" />
+    <None Include="test-data\upstream\html_x_4" />
+    <None Include="test-data\upstream\kppkn.gtb" />
+    <None Include="test-data\upstream\lcet10.txt" />
+    <None Include="test-data\upstream\paper-100k.pdf" />
+    <None Include="test-data\upstream\plrabn12.txt" />
+    <None Include="test-data\upstream\urls.10K" />
+    <None Include="test-data\gold\alice29.txt.gold" />
+    <None Include="test-data\gold\asyoulik.txt.gold" />
+    <None Include="test-data\gold\fireworks.jpeg.gold" />
+    <None Include="test-data\gold\geo.protodata.gold" />
+    <None Include="test-data\gold\html.gold" />
+    <None Include="test-data\gold\html_x_4.gold" />
+    <None Include="test-data\gold\kppkn.gtb.gold" />
+    <None Include="test-data\gold\lcet10.txt.gold" />
+    <None Include="test-data\gold\paper-100k.pdf.gold" />
+    <None Include="test-data\gold\plrabn12.txt.gold" />
+    <None Include="test-data\gold\urls.10K.gold" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TheFactory.Snappy\TheFactory.Snappy.csproj">
+      <Project>{8C2CA69C-CFF2-4781-8800-2F08F5056893}</Project>
+      <Name>TheFactory.Snappy</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
