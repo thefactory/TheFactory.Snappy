@@ -80,6 +80,7 @@ namespace TheFactory.Snappy.Tests {
             var decomp = SnappyDecoder.Decode(comp);
 
             Assert.AreEqual(data.Length, decomp.Length);
+            AssertArraysEqual(data, decomp);
         }
 
         [Test()]
@@ -96,6 +97,72 @@ namespace TheFactory.Snappy.Tests {
             }, comp);
 
             Roundtrip(data);
+        }
+
+        [Test()]
+        public void TestPaddedEncode() {
+            byte[] data = new byte[] {
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
+            };
+
+            var off = Padded(data, 5, 0);
+            var comp = SnappyEncoder.Encode(off, 5, off.Length - 5);
+
+            AssertArraysEqual(SnappyEncoder.Encode(data), comp);
+        }
+
+        [Test()]
+        public void TestPaddedEncodeToOffset() {
+            byte[] data = new byte[] {
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
+                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
+            };
+
+            var off = Padded(data, 5, 5);
+            var dst = new byte[SnappyEncoder.MaxEncodedLen(off.Length) + 3];
+            var len = SnappyEncoder.Encode(off, 5, data.Length, dst, 3, dst.Length - 3);
+
+            var comp = new byte[len];
+            Array.Copy(dst, 3, comp, 0, len);
+
+            AssertArraysEqual(SnappyEncoder.Encode(data), comp);
+        }
+
+        [Test()]
+        public void TestPaddedDecode() {
+            byte[] data = new byte[] {
+                0x12, 0x20, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
+                0x15, 0x09
+            };
+
+            var off = Padded(data, 5, 0);
+            var decomp = SnappyDecoder.Decode(off, 5, off.Length - 5);
+
+            AssertArraysEqual(SnappyDecoder.Decode(data), decomp);
+        }
+
+        [Test()]
+        public void TestPaddedDecodeToOffset() {
+            byte[] data = new byte[] {
+                0x12, 0x20, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
+                0x15, 0x09
+            };
+
+            var off = Padded(data, 5, 5);
+            var dst = new byte[off.Length + 3];
+            var len = SnappyDecoder.Decode(off, 5, data.Length, dst, 3, dst.Length - 3);
+
+            var decomp = new byte[len];
+            Array.Copy(dst, 3, decomp, 0, len);
+
+            AssertArraysEqual(SnappyDecoder.Decode(data), decomp);
+        }
+
+        byte[] Padded(byte[] a, int padHead, int padTail) {
+            byte[] ret = new byte[padHead + a.Length + padTail];
+            Array.Copy(a, 0, ret, padHead, a.Length);
+            return ret;
         }
 
         void AssertArraysEqual(byte[] a, byte[] b) {

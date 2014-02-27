@@ -21,8 +21,8 @@ namespace TheFactory.Snappy {
         public static UvarIntRet UvarInt(byte[] src, int srcOff) {
             ulong x = 0;
             int s = 0;
-            for (int i = srcOff; i < src.Length; i++) {
-                byte b = src[i];
+            for (int i = 0; i < src.Length - srcOff; i++) {
+                byte b = src[srcOff + i];
                 if (b < 0x80) {
                     if (i > 9 || i == 9 && b > 1) {
                         return new UvarIntRet(0, -(i + 1));
@@ -37,13 +37,13 @@ namespace TheFactory.Snappy {
         }
 
         public static int PutUvarInt(byte[] buf, int offset, ulong x) {
-            var i = offset;
+            var i = 0;
             while (x >= 0x80) {
-                buf[i] = (byte)(x | 0x80);
+                buf[i + offset] = (byte)(x | 0x80);
                 x >>= 7;
                 i++;
             }
-            buf[i] = (byte)x;
+            buf[i + offset] = (byte)x;
             return i + 1;
         }
     }

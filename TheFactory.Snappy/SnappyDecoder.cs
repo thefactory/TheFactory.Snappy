@@ -4,20 +4,30 @@ namespace TheFactory.Snappy {
 
     public class SnappyDecoder {
         public static byte[] Decode(byte[] src) {
-            var len = VarInt.UvarInt(src, 0);
+            return Decode(src, 0, src.Length);
+        }
 
+        public static byte[] Decode(byte[] src, int srcOff, int srcLen) {
+            var len = VarInt.UvarInt(src, srcOff);
             byte[] ret = new byte[len.Value];
-            Decode(src, len.VarIntLength, src.Length, ret, 0, ret.Length);
+
+            Decode(src, srcOff, srcLen, ret, 0, ret.Length);
             return ret;
         }
 
         public static int Decode(byte[] src, int srcOff, int srcLen, byte[] dst, int dstOff, int dstLen) {
-            int s = srcOff;
+            var len = VarInt.UvarInt(src, srcOff);
+            if (dstLen < (int)len.Value) {
+                // Destination array doesn't have enough room for the decoded data.
+                throw new IndexOutOfRangeException("snappy: destination array too short");
+            }
+
+            int s = srcOff + len.VarIntLength;
             int d = dstOff;
             int offset = 0;
             int length = 0;
 
-            while (s < srcLen) {
+            while (s < srcOff + srcLen) {
                 byte tag = (byte)(src[s] & 0x03);
                 if (tag == SnappyTag.Literal) {
                     uint x = (uint)(src[s] >> 2);
@@ -52,7 +62,7 @@ namespace TheFactory.Snappy {
                     if (length <= 0) {
                         throw new IndexOutOfRangeException("snappy: unsupported literal length");
                     }
-                    if (length > dstLen - d || length > srcLen - s) {
+                    if (length > dstLen - d || length > srcOff + srcLen - s) {
                         throw new IndexOutOfRangeException("snappy: corrupt input");
                     }
                     Array.Copy(src, s, dst, d, length);
@@ -61,14 +71,14 @@ namespace TheFactory.Snappy {
                     continue;
                 } else if (tag == SnappyTag.Copy1) {
                     s += 2;
-                    if (s > srcLen) {
+                    if (s > srcOff + srcLen) {
                         throw new IndexOutOfRangeException("snappy: corrupt input");
                     }
                     length = 4 + (((int)src[s - 2] >> 2) & 0x7);
                     offset = ((int)src[s - 2] & 0xe0) << 3 | (int)src[s - 1];
                 } else if (tag == SnappyTag.Copy2) {
                     s += 3;
-                    if (s > srcLen) {
+                    if (s > srcOff + srcLen) {
                         throw new IndexOutOfRangeException("snappy: corrupt input");
                     }
                     length = 1 + ((int)src[s - 3] >> 2);
@@ -85,9 +95,6 @@ namespace TheFactory.Snappy {
                 for (; d < end; d++) {
                     dst[d] = dst[d - offset];
                 }
-            }
-            if (d != dstLen) {
-                throw new IndexOutOfRangeException("snappy: corrupt input");
             }
 
             return d;

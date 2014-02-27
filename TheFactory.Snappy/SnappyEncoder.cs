@@ -12,8 +12,12 @@ namespace TheFactory.Snappy {
         }
 
         public static byte[] Encode(byte[] src) {
-            byte[] buf = new byte[MaxEncodedLen(src.Length)];
-            var len = Encode(src, 0, src.Length, buf, 0, buf.Length);
+            return Encode(src, 0, src.Length);
+        }
+
+        public static byte[] Encode(byte[] src, int srcOff, int srcLen) {
+            byte[] buf = new byte[MaxEncodedLen(srcLen)];
+            var len = Encode(src, srcOff, srcLen, buf, 0, buf.Length);
 
             byte[] ret = new byte[len];
             Array.Copy(buf, ret, len);
@@ -21,6 +25,11 @@ namespace TheFactory.Snappy {
         }
 
         public static int Encode(byte[] src, int srcOff, int srcLen, byte[] dst, int dstOff, int dstLen) {
+            if (dstLen < MaxEncodedLen(srcLen)) {
+                // Destination array doesn't have enough room for the encoded data.
+                throw new IndexOutOfRangeException("snappy: destination array too short");
+            }
+
             var d = new MemoryStream(dst, dstOff, dstLen);
 
             // The block starts with the varint-encoded length of the decompressed bytes.
@@ -49,7 +58,7 @@ namespace TheFactory.Snappy {
             // Iterate over the source bytes.
             int s = srcOff;
             int t = 0;
-            int lit = 0;
+            int lit = srcOff;
 
             while (s + 3 < srcLen) {
                 // Update the hash table.
@@ -88,7 +97,7 @@ namespace TheFactory.Snappy {
                 }
 
                 // Emit the copied bytes.
-                EmitCopy(d, s-t, s-s0);
+                EmitCopy(d, s-t, s-s0+srcOff);
                 lit = s;
             }
 

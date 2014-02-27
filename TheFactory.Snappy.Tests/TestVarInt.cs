@@ -6,10 +6,13 @@ namespace TheFactory.Snappy.Tests {
     [TestFixture()]
     public class TestVarInt {
         void roundtrip(ulong x) {
-            var buf = new byte[VarInt.MaxVarIntLen64];
-            int n = VarInt.PutUvarInt(buf, 0, x);
+            // Use some padding bytes to check nonzero offsets.
+            var pad = 5;
 
-            var ret = VarInt.UvarInt(buf, 0);
+            var buf = new byte[VarInt.MaxVarIntLen64 + pad];
+            int n = VarInt.PutUvarInt(buf, pad, x);
+
+            var ret = VarInt.UvarInt(buf, pad);
             Assert.AreEqual(n, ret.VarIntLength);
             Assert.AreEqual(x, ret.Value);
         }
